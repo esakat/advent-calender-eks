@@ -1,0 +1,16 @@
+kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/v2beta1
+metadata:
+  name: sqs-app-pop-scaler
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: sqs-app-pop
+  minReplicas: 1
+  maxReplicas: 40
+  metrics:
+  - type: External
+    external:
+      metricName: eks-sample-queue-length # 上記マニフェストで指定したname
+      targetValue: 1000

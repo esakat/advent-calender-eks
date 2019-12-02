@@ -1,0 +1,30 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: sqs-app-pop
+spec:
+  selector:
+    matchLabels:
+      app: sqs-app-pop
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sqs-app-pop
+    spec:
+      containers:
+      - name: sqs-app-pop
+        image: esaka/sqs-poppush:latest
+        command: ["python", "sqs-poppush.py"]
+        # resources:
+        #   requests:
+        #     cpu: 1
+        #   limits:
+        #     cpu: 2
+        env:
+        - name: QUEUE_NAME
+          value: eks-sample-queue
+        - name: ACTION_TYPE
+          value: pop
+        - name: AWS_DEFAULT_REGION
+          value: "ap-northeast-1"

@@ -1,0 +1,21 @@
+apiVersion: metrics.aws/v1alpha1
+kind: ExternalMetric
+metadata:
+  name: eks-sample-queue-length
+spec:
+  name: eks-sample-queue-length
+  resource:
+    resource: "deployment"
+  queries:
+    - id: sqs_queue_length
+      metricStat:
+        metric:
+          namespace: "AWS/SQS"
+          metricName: "ApproximateNumberOfMessagesVisible"
+          dimensions:
+            - name: QueueName
+              value: "eks-sample-queue"
+        period: 60
+        stat: Average
+        unit: Count
+      returnData: true

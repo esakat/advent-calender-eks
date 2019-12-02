@@ -1,0 +1,25 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: sqs-app-push
+spec:
+  selector:
+    matchLabels:
+      app: sqs-app-push
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: sqs-app-push
+    spec:
+      containers:
+      - name: sqs-app-push
+        image: esaka/sqs-poppush:latest
+        command: ["python", "sqs-poppush.py"]
+        env:
+        - name: QUEUE_NAME
+          value: eks-sample-queue
+        - name: ACTION_TYPE
+          value: push
+        - name: AWS_DEFAULT_REGION
+          value: "ap-northeast-1"
