@@ -1,0 +1,68 @@
+Parameters:
+  AutoScalingGroup:
+    Description: Target AutoScaling Group Name
+    Type: String
+
+  QueueName:
+    Description: Queue Name
+    Type: String
+
+Resources:
+  ASGScaleOutPolicy: 
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties: 
+      AdjustmentType: "ChangeInCapacity"
+      PolicyType: "SimpleScaling"
+      Cooldown: "60"
+      AutoScalingGroupName: !Ref AutoScalingGroup
+      ScalingAdjustment: 1
+
+  ASGScaleInPolicy: 
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties: 
+      AdjustmentType: "ChangeInCapacity"
+      PolicyType: "SimpleScaling"
+      Cooldown: "300"
+      AutoScalingGroupName: !Ref AutoScalingGroup
+      ScalingAdjustment: -1
+
+  ScalingAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "CPU high & Queue Size long"
+      Metrics:
+      - Id: e1
+        Expression: "MAX([(m1/1000),(m2/40)])"
+        Label: Value
+      - Id: m1
+        MetricStat:
+          Metric:
+            Namespace: AWS/SQS
+            MetricName: ApproximateNumberOfMessagesVisible
+            Dimensions:
+            - Name: QueueName
+              Value: !Ref QueueName
+          Period: 60
+          Stat: Average
+          Unit: Count
+        ReturnData: false
+      - Id: m2
+        MetricStat:
+          Metric:
+            Namespace: AWS/EC2
+            MetricName: CPUUtilization
+            Dimensions:
+            - Name: AutoScalingGroupName
+              Value: !Ref AutoScalingGroup
+          Period: 60
+          Stat: Average
+          Unit: Count
+        ReturnData: false
+      ComparisonOperator: GreaterThanThreshold
+      Threshold: 1.0
+      EvaluationPeriods: "1"
+      AlarmActions:
+        - !Ref ASGScaleOutPolicy
+      OKActions:
+        - !Ref ASGScaleInPolicy
+

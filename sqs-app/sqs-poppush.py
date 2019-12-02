@@ -5,7 +5,7 @@ import time
  
 queue_name = os.environ['QUEUE_NAME']
 action_type = os.environ['ACTION_TYPE']
-sqs = boto3.resource('sqs')
+sqs = boto3.resource('sqs', endpoint_url='https://sqs.ap-northeast-1.amazonaws.com', region_name="ap-northeast-1")
 queue = sqs.get_queue_by_name(QueueName=queue_name)
 
 if action_type == 'push':
